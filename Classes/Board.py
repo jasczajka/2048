@@ -1,6 +1,6 @@
 from enum import Enum
 import random
-from Classes.exceptions import WrongBoardSizeError
+from Classes.exceptions import *
 class Direction(Enum):
     UP = 1
     RIGHT = 2
@@ -8,18 +8,34 @@ class Direction(Enum):
     LEFT = 4
 
 class Board:
-    def __init__(self, size :int):
-        try:
-            self.size = int(size)
-        except ValueError:
-            raise WrongBoardSizeError
-        if size < 2:
-            raise WrongBoardSizeError
+    def __init__(self, size :int, goal: int):
+
+
+        if not isinstance(goal,int):
+            raise WrongBoardSizeError('board size must be an integer')
+        self.size = size
+        if self.size < 2:
+            raise WrongBoardSizeError('board size must be greater than 2')
+
+        if not isinstance(goal,int):
+            raise WrongGoalError('goal must an integer')
+        self.goal = goal
+        if self.goal.bit_count() != 1 or self.goal < 8:
+            raise WrongGoalError('goal must be power of 2 greater than 8')
+        self.goal = goal
         self.size = size
         self.board = [[0 for _ in range(self.size)] for _ in range(self.size)]
+        #2 tiles at beginning
+        self.generate_new_tile()
+        self.generate_new_tile()
     def print_board(self):
+        print('score: ', self.get_score_on_board(self))
+        print('goal: ', self.goal)
         for row in self.board:
             print(row)
+        print('max tile: ',self.find_max_tile())
+        if self.find_max_tile() >= self.goal:
+            print('goal reached!!')
         print('='*self.size)
     def get_2_or_4(self) -> int:
         prob = random.uniform(0,1)
@@ -27,6 +43,8 @@ class Board:
             return 2
         else:
             return 4
+    def find_max_tile(self):
+        return max(max(row) for row in self.board)
     def is_there_empty_tile(self) -> bool:
         for row in self.board:
             if 0 in row:
@@ -52,7 +70,7 @@ class Board:
         print(f"new {self.board[x][y]} tile at {x+1}, {y+1}")
     @staticmethod
     def get_score_on_board(board):
-        return sum([sum(row) for row in board])
+        return sum([sum(row) for row in board.board])
     def make_move(self, direction: Direction):
         if direction == Direction.UP:
             #shift up first
