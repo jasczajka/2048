@@ -17,9 +17,7 @@ class GUI:
         self.create_grid()
         self.update_grid()
 
-
         self.root.bind("<Key>", self.handle_keypress)
-
 
     def create_menu(self):
         menu_bar = tk.Menu(self.root)
@@ -78,9 +76,9 @@ class GUI:
         name = simpledialog.askstring("Save file", "Enter file name: ")
         if name:
             if not self.game.save_file(name):
-                messagebox.showinfo("Load error", "error saving, perhaps the name is already in use or save is corrupted?")
+                messagebox.showinfo("Save file", "error saving, perhaps the name is already in use or save is corrupted?")
             else:
-                messagebox.showinfo("Load error", "save successful")
+                messagebox.showinfo("Save file", "save successful")
 
     def save_score(self):
         name = simpledialog.askstring("Save Score", "Enter your name:")
@@ -129,9 +127,9 @@ class GUI:
         while self.game.board.is_there_move_possible():
             time.sleep(0.4)
             direction = self.game.board.get_direction_with_highest_empty_tiles()
-            self.game.board.make_move(direction)
-            if self.game.board.is_there_empty_tile():
-                self.game.board.generate_new_tile()
+            if self.game.board.make_move(direction):
+                if self.game.board.is_there_empty_tile():
+                    self.game.board.generate_new_tile()
             self.update_grid()
 
     def handle_keypress(self, event):
@@ -143,14 +141,14 @@ class GUI:
                 'a': Direction.LEFT,
                 'd': Direction.RIGHT
             }[key]
-            self.game.board.make_move(direction)
-            self.update_grid()
-            if self.game.board.is_goal_reached():
-                self.root.title("2048 Game - Goal Reached!")
-            if not self.game.board.is_there_move_possible():
-                messagebox.showinfo("Game Over", "No more moves possible. Game over!")
-                self.root.unbind("<Key>")
-            else:
-                if self.game.board.is_there_empty_tile():
-                    self.game.board.generate_new_tile()
+            if self.game.board.make_move(direction):
                 self.update_grid()
+                if self.game.board.is_goal_reached():
+                    self.root.title("2048 Game - Goal Reached!")
+                if not self.game.board.is_there_move_possible():
+                    messagebox.showinfo("Game Over", "No more moves possible. Game over!")
+                    self.root.unbind("<Key>")
+                else:
+                    if self.game.board.is_there_empty_tile():
+                        self.game.board.generate_new_tile()
+                    self.update_grid()

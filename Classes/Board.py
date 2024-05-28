@@ -49,7 +49,7 @@ class Board:
             return 2
         else:
             return 4
-    def find_max_tile(self):
+    def find_max_tile(self) -> int:
         return max(max(row) for row in self.tiles)
 
     def is_there_empty_tile(self) -> bool:
@@ -69,7 +69,7 @@ class Board:
                     return True
         return False
 
-    def get_random_empty_tile(self)->(int, int):
+    def get_random_empty_tile(self) -> (int, int):
         empty_tiles = [(x, y) for x in range(0, self.size) for y in range(0, self.size) if self.tiles[x][y] == 0]
         if len(empty_tiles) != 0:
             return random.choice(empty_tiles)
@@ -78,7 +78,7 @@ class Board:
         self.tiles[x][y] = self.get_2_or_4()
         print(f"new {self.tiles[x][y]} tile at {x+1}, {y+1}")
 
-    def get_score_on_board(self):
+    def get_score_on_board(self) -> int:
         return sum([sum(row) for row in self.tiles])
 
     def get_empty_tile_count(self) -> int:
@@ -91,7 +91,8 @@ class Board:
             potential_directions_empties[direction] = board_copy.get_empty_tile_count()
         return max(potential_directions_empties, key=potential_directions_empties.get)
 
-    def make_move(self, direction: Direction):
+    def make_move(self, direction: Direction) -> bool:
+        move_made = False
         if direction == Direction.UP:
             #shift up first
             for i in range(0, self.size):
@@ -103,6 +104,9 @@ class Board:
                         tmp = self.tiles[j][i]
                         self.tiles[j][i] = self.tiles[put_index][i]
                         self.tiles[put_index][i] = tmp
+                        #if something changed, then a move was made
+                        if self.tiles[j][i] != tmp:
+                            move_made = True
                         put_index += 1
                         j+=1
                     #if its a zero just go up
@@ -125,7 +129,7 @@ class Board:
                             else:
                                 self.tiles[k][i] = self.tiles[k+1][i]
                             k += 1
-                        #if a jump was made, jump over
+                        move_made = True
                     j += 1
         elif direction == Direction.DOWN:
             for i in range(0, self.size):
@@ -137,6 +141,8 @@ class Board:
                         tmp = self.tiles[j][i]
                         self.tiles[j][i] = self.tiles[put_index][i]
                         self.tiles[put_index][i] = tmp
+                        if self.tiles[j][i] != tmp:
+                            move_made = True
                         put_index -= 1
                         j -= 1
                     #if its a zero just go down
@@ -160,6 +166,7 @@ class Board:
                                 self.tiles[k][i] = self.tiles[k-1][i]
                             k -= 1
                         #if a merge was made, jump over
+                        move_made = True
                     j -= 1
 
         elif direction == Direction.LEFT:
@@ -173,6 +180,8 @@ class Board:
                         tmp = self.tiles[i][j]
                         self.tiles[i][j] = self.tiles[i][put_index]
                         self.tiles[i][put_index] = tmp
+                        if self.tiles[i][j] != tmp:
+                            move_made = True
                         put_index += 1
                         j += 1
                     # if its a zero just go up
@@ -180,6 +189,7 @@ class Board:
                         j += 1
                 #merge then
                 #for each row
+
             for i in range(0, self.size):
                 # start at 1, no point in comparing from 0
                 j = 1
@@ -196,6 +206,7 @@ class Board:
                                 self.tiles[i][k] = self.tiles[i][k + 1]
                             k += 1
                         # if a jump was made, jump over
+                        move_made = True
                     j += 1
 
         elif direction == Direction.RIGHT:
@@ -208,6 +219,8 @@ class Board:
                         tmp = self.tiles[i][j]
                         self.tiles[i][j] = self.tiles[i][put_index]
                         self.tiles[i][put_index] = tmp
+                        if self.tiles[i][j] != tmp:
+                            move_made = True
                         put_index -= 1
                         j -= 1
                     #if its a zero just go down
@@ -231,4 +244,6 @@ class Board:
                                 self.tiles[i][k] = self.tiles[i][k - 1]
                             k -= 1
                         #if a merge was made, jump over
+                        move_made = True
                     j -= 1
+        return move_made
