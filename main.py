@@ -3,11 +3,16 @@ from Classes.GUI import *
 
 
 if __name__ == '__main__':
-    # game = Game()
-    # game.play_console()
-    root = tk.Tk()
-    app = GUI(root)
-    root.mainloop()
-
-
-
+    game_type = input('enter 1 for console game, 2 for GUI version: ')
+    while True:
+        if game_type == '1':
+            game = Game()
+            game.play_console()
+            break
+        if game_type == '2':
+            root = tk.Tk()
+            app = GUI(root)
+            root.mainloop()
+            break
+        else:
+            game_type = input('enter 1 for console game, 2 for GUI version: ')

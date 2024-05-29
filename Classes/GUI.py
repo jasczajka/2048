@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 from Classes.Board import *
 from Classes.Game import *
 
@@ -125,12 +125,11 @@ class GUI:
 
     def play_computer_game(self):
         while self.game.board.is_there_move_possible():
-            time.sleep(0.4)
             direction = self.game.board.get_direction_with_highest_empty_tiles()
             if self.game.board.make_move(direction):
                 if self.game.board.is_there_empty_tile():
                     self.game.board.generate_new_tile()
-            self.update_grid()
+                self.update_grid()
 
     def handle_keypress(self, event):
         key = event.keysym

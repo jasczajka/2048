@@ -2,7 +2,6 @@ from Classes.Board import *
 import os.path
 import time
 import tkinter as tk
-from tkinter import messagebox
 
 
 class Game:
@@ -44,7 +43,6 @@ class Game:
                     print('error loading save file')
                     return False
 
-
     def save_score(self, file_name = None) -> bool:
         if file_name is None:
             file_name = input('Enter score file name: ')
@@ -73,14 +71,15 @@ class Game:
         leaderboard = self.get_leaderboard()
         for score in leaderboard:
             print(f'{score[0]} - scored {score[1]}')
+
     def play_game_computer(self):
         while self.board.is_there_move_possible():
             time.sleep(0.4)
             direction = self.board.get_direction_with_highest_empty_tiles()
-            self.board.make_move(direction)
-            if self.board.is_there_empty_tile():
-                self.board.generate_new_tile()
-            self.board.print_board()
+            if self.board.make_move(direction):
+                if self.board.is_there_empty_tile():
+                    self.board.generate_new_tile()
+                self.board.print_board()
 
     def play_console(self):
         valid_size_and_goal = False

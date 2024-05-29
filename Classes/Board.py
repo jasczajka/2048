@@ -31,7 +31,7 @@ class Board:
         self.generate_new_tile()
 
     def print_board(self):
-        print('score: ', self.get_score_on_board(self))
+        print('score: ', self.get_score_on_board())
         print('goal: ', self.goal)
         for row in self.tiles:
             print(row)
@@ -39,16 +39,19 @@ class Board:
         if self.is_goal_reached():
             print('goal reached!!')
         print('=='*self.size)
+
     def is_goal_reached(self) -> bool:
         if self.find_max_tile() >= self.goal:
             return True
         return False
+
     def get_2_or_4(self) -> int:
         prob = random.uniform(0, 1)
         if prob < 0.7:
             return 2
         else:
             return 4
+
     def find_max_tile(self) -> int:
         return max(max(row) for row in self.tiles)
 
@@ -73,22 +76,25 @@ class Board:
         empty_tiles = [(x, y) for x in range(0, self.size) for y in range(0, self.size) if self.tiles[x][y] == 0]
         if len(empty_tiles) != 0:
             return random.choice(empty_tiles)
+
     def generate_new_tile(self):
         (x, y) = self.get_random_empty_tile()
         self.tiles[x][y] = self.get_2_or_4()
-        print(f"new {self.tiles[x][y]} tile at {x+1}, {y+1}")
+        #print(f"new {self.tiles[x][y]} tile at {x+1}, {y+1}")
 
     def get_score_on_board(self) -> int:
         return sum([sum(row) for row in self.tiles])
 
     def get_empty_tile_count(self) -> int:
         return len([(x, y) for x in range(0, self.size) for y in range(0, self.size) if self.tiles[x][y] == 0])
+
     def get_direction_with_highest_empty_tiles(self) -> Direction:
-        potential_directions_empties = {Direction.UP: -1, Direction.DOWN: -1, Direction.LEFT: -1, Direction.RIGHT: -1}
-        for direction in potential_directions_empties:
+        directions = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT}
+        potential_directions_empties = {}
+        for direction in directions:
             board_copy = copy.deepcopy(self)
-            board_copy.make_move(direction)
-            potential_directions_empties[direction] = board_copy.get_empty_tile_count()
+            if board_copy.make_move(direction):
+                potential_directions_empties[direction] = board_copy.get_empty_tile_count()
         return max(potential_directions_empties, key=potential_directions_empties.get)
 
     def make_move(self, direction: Direction) -> bool:
@@ -108,14 +114,14 @@ class Board:
                         if self.tiles[j][i] != tmp:
                             move_made = True
                         put_index += 1
-                        j+=1
+                        j += 1
                     #if its a zero just go up
                     elif self.tiles[j][i] == 0:
-                        j+=1
+                        j += 1
             #merge then
             #for each column
             for i in range(0, self.size):
-                 # start at 1, no point in comparing from 0
+            # start at 1, no point in comparing from 0
                 j = 1
                 while j < self.size:
                     if self.tiles[j][i] == self.tiles[j-1][i] and self.tiles[j][i] != 0:
@@ -151,7 +157,7 @@ class Board:
             #merge then
             #for each column
             for i in range(0, self.size):
-                 # start at last - 1, no point in comparing from last
+            # start at last - 1, no point in comparing from last
                 j = self.size - 2
                 while j >= 0:
                     if self.tiles[j][i] == self.tiles[j+1][i] and self.tiles[j][i] != 0:
