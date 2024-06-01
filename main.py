@@ -7,7 +7,7 @@ if __name__ == '__main__':
     while True:
         if game_type == '1':
             game = Game()
-            game.play_console()
+            game.display_main_menu()
             break
         if game_type == '2':
             root = tk.Tk()

@@ -1,3 +1,6 @@
+"""
+A class that represents a board in a game of 2048 with custom size and goal.
+"""
 import copy
 from enum import Enum
 import random
@@ -5,6 +8,9 @@ from Classes.exceptions import *
 
 
 class Direction(Enum):
+    """
+    Enum class that represents move directions
+    """
     UP = 1
     RIGHT = 2
     DOWN = 3
@@ -13,6 +19,18 @@ class Direction(Enum):
 
 class Board:
     def __init__(self, size: int, goal: int):
+        """
+        Initializes an instance of a board with the given size and goal
+
+        Parameters:
+            size (int): The size of the board
+            goal (int): The goal as in the tile that player aims to achieve
+        Returns:
+            None
+        Raises:
+            WrongBoardSizeError: if the size is not an integer or is lower than 2
+            WrongGoalError: if the goal is not an integer or is less than 8 or more than 16384 or is not a power of 2
+        """
         if not isinstance(goal, int):
             raise WrongBoardSizeError('board size must be an integer')
         self.size = size
@@ -21,8 +39,8 @@ class Board:
         if not isinstance(goal, int):
             raise WrongGoalError('goal must an integer')
         self.goal = goal
-        if self.goal.bit_count() != 1 or self.goal <= 8:
-            raise WrongGoalError('goal must be power of 2 greater than 8')
+        if self.goal.bit_count() != 1 or self.goal <= 8 or self.goal > 16384:
+            raise WrongGoalError('goal must be power of 2 greater than 8 and smaller or equal to 16384')
         self.goal = goal
         self.size = size
         self.tiles = [[0 for _ in range(self.size)] for _ in range(self.size)]
@@ -31,21 +49,40 @@ class Board:
         self.generate_new_tile()
 
     def print_board(self):
+        """
+        Prints the current state of the board on the console
+        Returns:
+            None
+        """
         print('score: ', self.get_score_on_board())
         print('goal: ', self.goal)
         for row in self.tiles:
-            print(row)
+            print('[',end="")
+            for tile in row:
+                print(f'{tile:{5}} ', end="")
+            print(']')
         print('max tile: ', self.find_max_tile())
         if self.is_goal_reached():
             print('goal reached!!')
         print('=='*self.size)
 
     def is_goal_reached(self) -> bool:
+        """
+        Checks if the goal set by the player is rached
+        Returns:
+            bool: True if the goal is reached, False otherwise
+        """
+
         if self.find_max_tile() >= self.goal:
             return True
         return False
 
     def get_2_or_4(self) -> int:
+        """
+        Returns either 2 with probability of 70% or 4 with probability of 30%
+        Returns:
+            int: 2 or 4
+        """
         prob = random.uniform(0, 1)
         if prob < 0.7:
             return 2
@@ -53,15 +90,30 @@ class Board:
             return 4
 
     def find_max_tile(self) -> int:
+        """
+        Finds the maximum tile currently on the board
+        Returns:
+            int: the maximum tile
+        """
         return max(max(row) for row in self.tiles)
 
     def is_there_empty_tile(self) -> bool:
+        """
+        Checks if there is an empty tile in the board
+        Returns:
+            bool: True if there is a tile, False otherwise
+        """
         for row in self.tiles:
             if 0 in row:
                 return True
         return False
 
     def is_there_move_possible(self) -> bool:
+        """
+        Checks if there is a possible move on the board, first checking if there is an empty tile, then if there are 2 neigbhors with possibility to merge
+        Returns:
+            bool: True if there is a possible move, False otherwise
+        """
         if self.is_there_empty_tile():
             return True
         for i in range(self.size):
@@ -73,22 +125,48 @@ class Board:
         return False
 
     def get_random_empty_tile(self) -> (int, int):
+        """
+        Gets coordinates of a random empty tile on the board
+        Returns:
+            (int, int): coordinates of the empty tile
+        """
         empty_tiles = [(x, y) for x in range(0, self.size) for y in range(0, self.size) if self.tiles[x][y] == 0]
         if len(empty_tiles) != 0:
             return random.choice(empty_tiles)
 
     def generate_new_tile(self):
+        """
+        Generates a new 2/4 tile on the board in an empty spot
+        Returns:
+            None
+        """
         (x, y) = self.get_random_empty_tile()
         self.tiles[x][y] = self.get_2_or_4()
         #print(f"new {self.tiles[x][y]} tile at {x+1}, {y+1}")
 
     def get_score_on_board(self) -> int:
+        """
+        Gets the sum of the tiles on the board as the score
+        Returns:
+            int: sum of the tiles on the board
+        """
         return sum([sum(row) for row in self.tiles])
 
     def get_empty_tile_count(self) -> int:
+        """
+        Gets the number of empty tiles on the board
+        Returns:
+            int: number of empty tiles on the board
+        """
         return len([(x, y) for x in range(0, self.size) for y in range(0, self.size) if self.tiles[x][y] == 0])
 
     def get_direction_with_highest_empty_tiles(self) -> Direction:
+        """
+        Gets the direction of the move with the highest empty tiles on the board after the move would be made
+        Only considers valid moves
+        Returns:
+            Direction: Direction of the move with the highest empty tile count
+        """
         directions = {Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT}
         potential_directions_empties = {}
         for direction in directions:
@@ -98,6 +176,14 @@ class Board:
         return max(potential_directions_empties, key=potential_directions_empties.get)
 
     def make_move(self, direction: Direction) -> bool:
+        """
+        Makes a move is the given direction
+        If the move is invalid, no tiles were merged, or shifted in any direction, it means the move was not made and False is returned
+        Parameters:
+            Direction: Direction of the move to be made
+        Returns:
+            bool: True if the move was valid and made, False otherwise
+        """
         move_made = False
         if direction == Direction.UP:
             #shift up first
