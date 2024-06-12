@@ -62,6 +62,10 @@ class GUI:
         leaderboard_menu.add_command(label="View Leaderboard", command=self.print_leaderboard)
         menu_bar.add_cascade(label="Leaderboard", menu=leaderboard_menu)
 
+
+
+
+
         self.root.config(menu = menu_bar)
     def new_game(self):
         """
@@ -140,16 +144,21 @@ class GUI:
             None
         """
         if self.frame:
+            self.next_computer_move_button.destroy()
             self.frame.destroy()
 
         self.frame = tk.Frame(self.root)
-        self.frame.grid()
+        self.frame.grid(sticky="w")
 
         for i in range(self.size):
             for j in range(self.size):
                 tile = tk.Label(self.frame, text="", width=4, height=2, font=("Helvetica", 24), borderwidth=2, relief="groove")
                 tile.grid(row=i, column=j, padx=5, pady=5)
                 self.tiles[i][j] = tile
+        self.next_computer_move_button = tk.Button(
+            text="Next computer move", command=self.make_computer_move)
+        self.next_computer_move_button.grid(row=len(self.game.board.tiles), column = len(self.game.board.tiles), padx=5, pady=5)
+
 
     def update_grid(self):
         """
